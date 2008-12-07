@@ -1,0 +1,4 @@
+#Example line for post-commit
+/opt/svnspam/svn_post_commit_hook.rb --config /opt/svnspam/svnspam.conf $*  >> /tmp/svnspam.log 2>&1
+#
+
