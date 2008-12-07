@@ -1,0 +1,519 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook V4.1//EN"
+                         "docbook/dtd/4.1.2/docbook.dtd">
+<?xml-stylesheet href="/home/dave/projects/docbook-css/driver.css" type="text/css"?>
+
+
+<article><title>CVSspam Documentation</title>
+
+<para>For the latest version, visit
+      <ulink url="http://www.badgers-in-foil.co.uk/projects/cvsspam/"></ulink>.</para>
+
+<section><title>Installation</title>
+
+  <para>The essentials for getting CVSspam working on your CVS server
+  are,</para>
+
+  <itemizedlist>
+    <listitem>
+      <para>An already working CVS server</para>
+    </listitem>
+    <listitem>
+      <para>An installation of Ruby</para>
+    </listitem>
+    <listitem>
+      <para>A working mail transport agent; <command>sendmail</command>, or
+      compatable</para>
+    </listitem>
+    <listitem>
+      <para>Install CVSspam files on the CVS server</para>
+    </listitem>
+    <listitem>
+      <para>Configure CVS to invoke the CVSspam scripts when a change is
+      committed to the repository</para>
+    </listitem>
+    <listitem>
+      <para>Optionally, configure CVSspam itself, if the default settings don't
+      work, or aren't to your taste</para>
+    </listitem>
+  </itemizedlist>
+
+  <para>It may be possible to start testing CVSspam after having installed the
+  files and configured CVS.  If CVSspam is unable to find
+  <command>cvs</command> or <command>sendmail</command> in the default system
+  PATH, then you will not be able to use CVSspam until after you have supplied
+  a <filename>cvsspam.conf</filename> specifying the locations of those
+  commands.</para>
+
+  <section>
+    <title>Ruby</title>
+
+    <para>A description of how to install Ruby on your system is beyond the
+    scope of this document.  If your operating system distribution provides
+    a Ruby package, install this.  You can obtain copies of Ruby from
+    <ulink url="http://www.ruby-lang.org/">ruby-lang.org</ulink>.</para>
+
+    <para>As noted below, if Ruby is installed somewhere other than
+    <filename>/usr/bin/ruby</filename> you will need to change the first
+    line of all the Ruby script files.</para>
+  </section>
+
+<section><title>Installing CVSspam files</title>
+  <para>The CVSspam scripts may be located anywhere in the CVS server's
+  filesystem.  If you are a user of a CVS service hosted by a third party, you
+  may have no access to the server other than by CVS itself.  You can still use
+  CVSspam in this case, by adding the files to the repository's
+  <filename>CVSROOT</filename> module.  The simple installation method is
+  to be preferred to this, as there are fewer steps to go wrong.</para>
+
+  <para>Before initiating your installation, be sure to read though the
+  supplied <filename>cvsspam.conf</filename> to see the configuration values
+  you might be reqired to supply.</para>
+
+  <note>
+    <title>Executable Scripts</title>
+
+    <para>The CVSspam scripts (<filename>record_lastdir.rb</filename>,
+    <filename>collect_diffs.rb</filename> and <filename>cvsspam.rb</filename>)
+    are, as distributed, marked with the unix
+    <wordasword>executable</wordasword> attribute.  If you do something which
+    removes this attribute (for example, copying the files from a windows
+    machine using Samba) ensure it is restored by using the command
+    <userinput>chmod +x</userinput> on all the files.</para>
+  </note>
+
+  <note>
+    <title>Ruby Location</title>
+
+    <para>The scripts assume that Ruby is installed at the location
+    <filename>/usr/bin/ruby</filename>.  If Ruby is installed elsewhere on
+    your CVS server, you will need to change the three
+    <filename>.rb</filename> files CVSspam provides.  The first line in each
+    of these files looks like,</para>
+
+    <informalexample><screen>#!/usr/bin/ruby -w</screen></informalexample>
+
+    <para>You must change <filename>/usr/bin/ruby</filename> to the correct
+    path (on many systems, the command <userinput>which ruby</userinput> will
+    tell you the value required).</para>
+  </note>
+
+  <section>
+    <title>Simple Installation</title>
+
+    <para>Pick a location for the three scripts to live, such as
+    <filename>/usr/local/lib/cvsspam/</filename>.  Copy the scripts here, and
+    confirm that the files are executable:</para>
+
+    <informalexample><screen>$ <userinput>/usr/local/lib/cvsspam/cvsspam.rb</userinput>
+missing required file argument
+Usage: cvsspam.rb [ --to &lt;email&gt; ] [ --config &lt;file&gt; ] &lt;collect_diffs file&gt;</screen></informalexample>
+
+    <para>Copy the example <filename>cvsspam.conf</filename> to
+    <filename>/etc/cvsspam</filename>.</para>
+  </section>
+
+  <section><title>Installation Using CVS</title>
+    <para>Check out your repository's <filename>CVSROOT</filename>.</para>
+    <informalexample><screen><replaceable>...set $CVSROOT to point at your repository...</replaceable>
+$ cvs checkout CVSROOT
+$ cd CVSROOT
+$ ls
+CVS           <emphasis role="bold">commitinfo</emphasis>  cvswrappers  <emphasis role="bold">loginfo</emphasis>  notify   taginfo
+checkoutlist  config      editinfo     modules  rcsinfo  verifymsg
+</screen></informalexample>
+
+    <para>Place <filename>record_last_dir.rb</filename>,
+    <filename>collect_diffs.rb</filename> and <filename>cvsspam.rb</filename>
+    into this directory.</para>
+
+<para>Add these three filenames into <filename>CVSROOT/checkoutlist</filename>
+<informalexample><screen># The "checkoutlist" file is used to support additional version controlled
+# administrative files in $CVSROOT/CVSROOT, such as template files.
+#
+# The first entry on a line is a filename which will be checked out from
+# the corresponding RCS file in the $CVSROOT/CVSROOT directory.
+# The remainder of the line is an error message to use if the file cannot
+# be checked out.
+#
+# File format:
+#
+#       [&lt;whitespace&gt;]&lt;filename&gt;&lt;whitespace&gt;&lt;error message&gt;&lt;end-of-line&gt;
+#
+# comment lines begin with '#'
+<emphasis role="bold">record_lastdir.rb
+collect_diffs.rb
+cvsspam.rb</emphasis>
+</screen></informalexample>
+</para>
+
+<para><userinput>cvs add</userinput> the three scripts to the repository, then
+      <userinput>cvs commit</userinput> them, and the modified
+      <filename>checkoutlist</filename>.</para>
+
+<para>In <filename>commitinfo</filename> and <filename>loginfo</filename> you
+      can now refer to the scripts with
+      <filename>$CVSROOT/CVSROOT/record_lastdir.rb</filename> and
+      <filename>$CVSROOT/CVSROOT/collect_diffs.rb</filename></para>
+</section>
+
+</section>
+
+
+<section><title>Configure CVS</title>
+
+<para>To install CVSspam you'll need to alter the repository's configuration
+      files.</para>
+
+<para>Alter <filename>commitinfo</filename> to call the CVSspam script
+that records the directories that have been committed:</para>
+
+<informalexample><screen># The "commitinfo" file is used to control pre-commit checks.
+# The filter on the right is invoked with the repository and a list
+# of files to check.  A non-zero exit of the filter program will
+# cause the commit to be aborted.
+#
+# The first entry on a line is a regular expression which is tested
+# against the directory that the change is being committed to, relative
+# to the $CVSROOT.  For the first match that is found, then the remainder
+# of the line is the name of the filter to run.
+#
+# If the repository name does not match any of the regular expressions in this
+# file, the "DEFAULT" line is used, if it is specified.
+#
+# If the name "ALL" appears as a regular expression it is always used
+# in addition to the first matching regex or "DEFAULT".
+
+<emphasis role="bold">^<replaceable>myproject</replaceable> <replaceable>/path/to</replaceable>/record_lastdir.rb</emphasis>
+</screen></informalexample>
+
+<warning>
+<para>Users without direct administrative control over their repository please
+take note:</para>
+<para>An error in the initial configuration of <filename>commitinfo</filename>
+can can prevent commits to the modules your rule matches.  This will cause
+you a major problem if you use the "ALL" or "DEFAULT" rules, as you will
+no longer be able to commit changes to the <filename>CVSROOT</filename> module
+to fix the problem.</para>
+<para>If you use the "DEFAULT" rule, take the precation of specifying a rule
+for <filename>CVSROOT</filename> that will never fail:
+<footnote><para>We don't simply use <command>/bin/true</command>, as CVS
+dislikes commands that don't consume their standard input.</para></footnote>
+</para>
+<informalexample><screen># always allow commits to CVSROOT
+^CVSROOT  /bin/cat>/dev/null
+
+# Invoke CVSspam lastdir script,
+DEFAULT ...
+</screen></informalexample>
+</warning>
+
+<note>
+  <para>If you are using a version of CVS from the 1.12.x series, or later,
+  the format of <filename>commitinfo</filename> has changed, and now requires
+  that 'format strings' appear on the line following the name of your
+  script.  If you see messages like,
+
+<informalexample><screen>cvs commit: warning: commitinfo line contains no format strings:
+    "/home/dave/projects/cvsspam/record_lastdir.rb"
+Appending defaults (" %r/%p %s"), but please be aware that this usage is
+deprecated.
+</screen></informalexample>
+
+  then follow the advice, and add the example format string to silence the
+  warning from CVS.</para>
+
+  <para>The resulting line should now look like,
+<informalexample><screen>^<replaceable>myproject</replaceable> <replaceable>/path/to</replaceable>/record_lastdir.rb <emphasis role="bold">%r/%p %s</emphasis>
+</screen></informalexample></para>
+</note>
+
+<para>Now you need to alter <filename>loginfo</filename> to record the log
+entry made by the user (and send off the email):</para>
+
+<informalexample><screen># The "loginfo" file controls where "cvs commit" log information
+# is sent.  The first entry on a line is a regular expression which must match
+# the directory that the change is being made to, relative to the
+# $CVSROOT.  If a match is found, then the remainder of the line is a filter
+# program that should expect log information on its standard input.
+#
+# If the repository name does not match any of the regular expressions in this
+# file, the "DEFAULT" line is used, if it is specified.
+#
+# If the name ALL appears as a regular expression it is always used
+# in addition to the first matching regex or DEFAULT.
+#
+# You may specify a format string as part of the
+# filter.  The string is composed of a `%' followed
+# by a single format character, or followed by a set of format
+# characters surrounded by `{' and `}' as separators.  The format
+# characters are:
+#
+#   s = file name
+#   V = old version number (pre-checkin)
+#   v = new version number (post-checkin)
+#
+# For example:
+#DEFAULT (echo ""; id; echo %s; date; cat) &gt;&gt; $CVSROOT/CVSROOT/commitlog
+# or
+#DEFAULT (echo ""; id; echo %{sVv}; date; cat) &gt;&gt; $CVSROOT/CVSROOT/commitlog
+
+<emphasis role="bold">^<replaceable>myproject</replaceable> <replaceable>/path/to</replaceable>/collect_diffs.rb --to <replaceable>me@somewhere.invalid</replaceable> %{sVv}</emphasis>
+</screen></informalexample>
+
+<note>
+<para>The expression you use to select the project (the first thing on the line)
+must be the same in <filename>commitinfo</filename> and
+<filename>loginfo</filename>.</para>
+</note>
+
+<para>Commit your changes to these files. You should see a message from CVS like
+'rebuilding administrative database'.  You are now be ready to test
+the setup.</para>
+
+<para>Checkout a copy of <replaceable>myproject</replaceable> and commit
+a change.  An email should be sent to the address you specified.</para>
+
+</section>
+
+
+<section><title>Configuration File</title>
+  <para>You can specify CVSspam options in an external configuration file.  See
+  the example <filename>cvsspam.conf</filename> provided for information about
+  the full set of options available.</para>
+
+  <para>CVSspam will load <filename>$CVSROOT/CVSROOT/cvsspam.conf</filename>
+  or <filename>/etc/cvsspam/cvsspam.conf</filename>, if they exist.  You can
+  specify another location with the <option>--config</option> option to
+  <filename>collect_diffs.rb</filename>.</para>
+
+  <para>If you want to put your config into the repository, follow the
+  instructions above for installing files into <filename>CVSROOT</filename>,
+  and remember to add <filename>cvsspam.conf</filename> to the
+  <filename>checkoutlist</filename>.</para>
+</section>
+
+
+<section><title>Sending Email</title>
+
+<section><title>Sendmail / SMTP </title>
+  <para>By default, CVSspam will attempt invoke an external program to send
+  out messages.  This program will normally be
+  <filename>/usr/sbin/sendmail</filename>, but you can specify another
+  using the $sendmail_prog setting in the config file.  (Whatever you specify
+  must accept the email on it's stdin, and understand the '-t' flag to cause
+  it to take message headers from this input.)</para>
+
+  <para>By specifying <option>$smtphost</option> in the configuration
+  file, you can make CVSspam contact an SMTP server directly, rather than
+  using an external program.  Only use this option if there is no MTA installed
+  on your CVS server.
+<informalexample><screen>$smtphost = "mail.example.domain"
+</screen></informalexample></para>
+</section>
+
+<section><title>From Address</title>
+  <para>When all CVS users have real accounts on the server, the sender address
+  in generated emails will be derived from the username of the commiter.  This
+  relies on a standard behavior of sendmail-like MTAs; we don't specify any
+  address, so the MTA must add one.</para>
+  
+  <para>CVS accounts are commonly aliased to a less privileged account on the
+  server, such as 'nobody', for extra security.  Unfortunately, combined with
+  the default CVSspam configuration, this will result in all notifications
+  appearing to originate From 'nobody@hostname', obscuring the actual
+  commiter.</para>
+
+  <para>CVSspam provides a <option>--from</option> option which you can use to
+  specify the person who is really committing.  Further, CVS provides a magic
+  $USER keyword in the <filename>loginfo</filename> file that will be replaced
+  with the CVS account name.</para>
+
+  <informalexample><screen># loginfo entry for aliased accounts
+^myproject /path/to/collect_diffs.rb <emphasis role="bold">--from $USER</emphasis> --to me@somewhere.invalid %{sVv}
+</screen></informalexample>
+
+  <para>If you would like control over the email address used for each user,
+  consider using a platform-specific meachanism for customising how your MTA
+  formats user's addresses (e.g. <filename>/etc/email-addresses</filename>).
+  Additionally, CVSspam will make use of <filename>CVSROOT/users</filename>,
+  if this exists, to derive the email address.  The format of
+  <filename>CVSROOT/users</filename> is one username:address pair on each line
+  (as documented in
+  <ulink url="http://cvsbook.red-bean.com/cvsbook.html#users">Open Source
+  Development with CVS</ulink>)</para>
+</section>
+
+<section><title>Global Email Addresses</title>
+  <para>Recipient email addresses can be put in the configuration file as well
+  as in each <filename>loginfo</filename> entry.  For example,</para>
+
+  <informalexample><screen>addRecipient "code-review@somewhere.invalid"
+addRecipient "project-owner@somewhere.invalid"
+</screen></informalexample>
+</section>
+
+</section>
+
+
+<section><title>Debugging installation problems</title>
+
+<qandaset>
+
+<qandaentry>
+  <question><para>No email coming from CVS commits, and no error messages on the
+            command line</para></question>
+  <answer><para>Did you specify the right email address?</para></answer>
+  <answer><para>Does the regular expression you specified in
+          <filename>commitinfo</filename> and <filename>loginfo</filename> really
+	  match the project?  Try changing the entry to something like
+          <informalexample><screen>^<replaceable>myproject</replaceable> <emphasis role="bold">echo "Hello world"</emphasis></screen></informalexample>
+	  When you commit a change to <replaceable>myproject</replaceable>,
+	  'Hello world' should appear in your terminal.  If it doesn't, verify
+          that the expression on the left is correct.</para></answer>
+  <answer><para>Check that the CVS server correctly handles email.  By default
+          CVSspam invokes sendmail.  Try running sendmail by hand on the CVS server
+	  machine
+	  <informalexample><screen>$ echo test | /usr/sbin/sendmail <replaceable>me@somewhere.invalid</replaceable></screen></informalexample>
+	  </para></answer>
+</qandaentry>
+
+<qandaentry>
+  <question><para>Why do I see the message <computeroutput>No such file or directory
+            cvs</computeroutput> on the console after committing?</para></question>
+  <answer><para>The cvs executable is probably not in the default executable
+          search path available to the CVSspam scripts.  Tell them explicitly
+	  where to find cvs by setting the $cvs_prog option in the
+	  configuration file.</para></answer>
+</qandaentry>
+
+<qandaentry>
+  <question><para>When I try to commit, I see messages like, <informalexample><screen>cvs commit: loginfo:32: no such internal variable $USEt
+cvs commit: loginfo:32: no such internal variable $USEH
+cvs commit: loginfo:32: no such internal variable $USExist</screen></informalexample>
+  and other garbled $var names, but I don't use any variables like these, just
+  the <computeroutput>$USER</computeroutput> keyword</para></question>
+
+  <answer><para>This seems to be a bug in CVS (in at least version 1.12.9).
+  Try upgrading the server.</para></answer>
+</qandaentry>
+
+</qandaset>
+
+</section>
+
+</section>
+
+
+<section><title>Integration Options</title>
+
+<section><title>Bug Tracking Software</title>
+  <para>CVSspam can generate simple links to web-based bug tracking systems.
+  Links are formed from specially formatted text in the commit-log
+  message.</para>
+
+  <section><title>Bugzilla</title>
+  <para>For
+  <ulink url="http://www.mozilla.org/projects/bugzilla/">Bugzilla</ulink>,
+  when a CVS log comment contains text like <userinput>Fix for bug
+  <replaceable>123</replaceable>...</userinput>, the text <quote>bug
+  <replaceable>nnn</replaceable></quote> will become a hyper-link to that
+  Bugzilla page in the generated email.</para>
+
+<para>To enable, give your Bugzilla's URL in CVSspam's configuration file
+<informalexample><screen>$bugzillaURL = "http://bugzilla.mozilla.org/show_bug.cgi?id=%s"
+</screen></informalexample>
+      The marker <literal>%s</literal> tells CVSspam where in the URL to put
+      the bugId from the log message.</para>
+  </section>
+
+  <section><title>JIRA</title>
+<para>For <ulink url="http://www.atlassian.com/software/jira/">JIRA</ulink>,
+      include the issueId in the log comment.  JIRA issue Ids have
+      a project name and issue number, separated by a dash. For example
+      <literal>JRA-1545</literal>.</para>
+
+<para>To enable, give your JIRA installation's URL in CVSspam's configuration
+file
+<informalexample><screen>$jiraURL = "http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s"
+</screen></informalexample>
+      The marker <literal>%s</literal> tells CVSspam where in the URL to put
+      the issue Id from the log message.</para>
+  </section>
+
+  <section><title>RT</title>
+<para>For systems that like to talk about <wordasword>tickets</wordasword>,
+      CVSspam will make links from text in the log comment that looks like
+      <quote>ticket <replaceable>nnn</replaceable></quote> (where
+      <replaceable>nnn</replaceable> is a number).
+      For instance with <ulink url="http://fsck.com/projects/rt/">RT</ulink>,
+      supply the location of <filename>Display.html</filename>
+<informalexample><screen>$ticketURL = "http://localhost/rt2/Ticket/Display.html?id=%s"
+</screen></informalexample>
+      </para>
+  </section>
+</section>
+
+<section><title>CVS Web Frontends</title>
+
+<para>If you have <ulink url="http://viewcvs.sourceforge.net/">ViewCVS</ulink>,
+      <ulink url="http://www.freebsd.org/projects/cvsweb.html">CVSweb</ulink>
+      or <ulink url="http://www.horde.org/chora/">Chora</ulink>
+      web-access to your repository, CVSspam can generate
+      links to it in the emails.  Links the file before and after the commit
+      are very useful for images, as only changes to binary text files are
+      mailed.  You'll get a link to the side-by-side view of the changes as
+      well.</para>
+
+<para>You may only specify one of these three options.</para>
+
+<section><title>ViewCVS</title>
+<para>To enable ViewCVS support, specify the URL of the top-level
+      ViewCVS directory in <filename>cvsspam.conf</filename>.
+<informalexample><screen>$viewcvsURL = "http://localhost/cgi-bin/viewcvs.cgi/"
+</screen></informalexample>
+</para>
+</section>
+
+<section><title>CVSweb</title>
+<para>For CVSweb, specify the URL of <filename>cvsweb.cgi</filename>,
+<informalexample><screen>$cvswebURL = "http://localhost/cgi/cvsweb.cgi/"
+</screen></informalexample>
+</para>
+</section>
+
+<section><title>Chora</title>
+<para>For Chora, specify the URL of the directory containing
+      <filename>cvs.php</filename>,
+<informalexample><screen>$choraURL = "http://localhost/hord/chora/"
+</screen></informalexample>
+</para>
+</section>
+
+<section><title>Multiple CVS repositories</title>
+<para>If ViewCVS or CVSweb are configured for multiple repositories, you can
+specify which to use by defining a value for
+<literal>$repository_name</literal>. You can either hardcode the name of a
+repository, or use the special value <literal>GUESS</literal>, which will cause
+CVSspam to use the last segment of the CVSROOT path as the repository
+name.</para>
+
+<informalexample><screen># this is the top-secret repository
+$repository_name = "Secret Projects"
+</screen></informalexample>
+
+<para>Note that <literal>GUESS</literal> is not surrounded by quotes.</para>
+
+<informalexample><screen># our repositories are named after their containing directories,
+$repository_name = GUESS
+</screen></informalexample>
+
+<para><literal>GUESS</literal> should be handy in environments like
+<ulink url="http://gforge.org/">GForge</ulink></para>
+</section>
+
+</section>
+
+</section><!-- Configuration Options -->
+
+</article>
