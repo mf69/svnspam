@@ -1,0 +1,35 @@
+#summary Install instructions
+
+= Introduction =
+This page explains how to install svnspam.
+
+= Pre-requisites =
+ * A working subversion repository
+ * Ruby must be installed on the subversion server
+
+
+
+= Details =
+
+Download the tarball into your /tmp folder
+
+Extract somewhere useful... recommended: /opt/svnspam
+{{{
+ cd /opt
+ tar xzvf /tmp/svnspam-0.1.tar.gz
+}}}
+
+Review the configuration file, making any obvious customizations
+{{{
+ vi /opt/svnspam/svnspam.conf
+}}}
+
+Add the commit-hook. For example, if you subversion repository is in /opt/svn/repo you might have this in /opt/svn/repo/hooks/post-commit...
+{{{
+ #!/bin/sh
+ # POST-COMMIT HOOK
+ REPOS="$1"
+ REV="$2"
+ echo "$*" >> /tmp/svnspam.log
+ /opt/svnspam/svn_post_commit_hook.rb --config /opt/svnspam/svnspam.conf --from subversion@example.com $*  >> /tmp/svnspam.log 2>&1
+}}}
