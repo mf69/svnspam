@@ -1,12 +1,6 @@
 #!/usr/bin/ruby -w
-#This is the program to call from the hooks/post-commit script
-#e.g.
-#/opt/svn/hooks/svn_post_commit_hook.rb \
-# --config /opt/svn/hooks/svnspam.conf \
-# --to admin@example.com --from svn@example.com
-# $* >> /tmp/svnspam.log 2>&1
-
-
+#$Id$
+#$URL$
 $svnlook_exe = "svnlook"  # default assumes the program is in $PATH
 
 def usage(msg)

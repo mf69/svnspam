@@ -1,8 +1,6 @@
 # -*- Ruby -*- Configuration for SVNspam commit-mail generation system
-
-# Part of SVNspam
-#   http://www.bitpusher.com/projects/cvsspam/
-
+#$Id$
+#$URL$
 # SMTP host name                                                     (Required)
 #   Specify an SMTP server to relay the mail through
 #$smtp_host = "mail.example.com"

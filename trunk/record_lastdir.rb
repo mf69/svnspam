@@ -1,9 +1,6 @@
 #!/usr/bin/ruby -w
-
-# Part of CVSspam
-#   http://www.badgers-in-foil.co.uk/projects/cvsspam/
-# Copyright (c) David Holroyd
-
+#$Id$
+#$URL$
 $repositorydir = ARGV.shift
 
 $tmpdir = ENV["TMPDIR"] || "/tmp"
