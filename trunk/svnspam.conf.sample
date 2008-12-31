@@ -43,6 +43,7 @@
 
 #$jiraURL = "http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s"
 
+#$rtURL = "https://noc.bitpusher.com/rt/Ticket/Display.html?id=%s"
 
 # Link to Wiki systems
 # 
