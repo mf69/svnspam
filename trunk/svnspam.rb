@@ -522,9 +522,9 @@ bugzillaSub = proc { |match|
 jiraSub = proc { |match|
   "<a href=\"#{$jiraURL.sub(/%s/, match)}\">#{match}</a>"
 }
-ticketSub = proc { |match|
+rtSub = proc { |match|
   match =~ /([0-9]+)/
-  "<a href=\"#{$ticketURL.sub(/%s/, $1)}\">#{match}</a>"
+  "<a href=\"#{$rtURL.sub(/%s/, $1)}\">#{match}</a>"
 }
 commentSubstitutions = {
 		'(?:mailto:)?[\w\.\-\+\=]+\@[\w\-]+(?:\.[\w\-]+)+\b' => mailSub,
@@ -1204,7 +1204,7 @@ $no_diff = false
 $task_keywords = ['TODO', 'FIXME']
 $bugzillaURL = nil
 $jiraURL = nil
-$ticketURL = nil
+$rtURL = nil
 $viewsvnURL = nil
 $svnwebURL = nil
 $from_address = nil
@@ -1309,8 +1309,8 @@ end
 if $jiraURL != nil
   commentSubstitutions['\b[a-zA-Z]+-[0-9]+\b'] = jiraSub
 end
-if $ticketURL != nil
-  commentSubstitutions['\b[Tt][Ii][Cc][Kk][Ee][Tt]\s*#?[0-9]+\b'] = ticketSub
+if $rtURL != nil
+  commentSubstitutions['\b[rR][Tt]\s*#?[0-9]+\b'] = rtSub
 end
 $commentEncoder = MultiSub.new(commentSubstitutions)
 
