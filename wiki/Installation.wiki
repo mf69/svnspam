@@ -17,6 +17,8 @@ Extract somewhere useful... recommended: /opt/svnspam
 {{{
  cd /opt
  tar xzvf /tmp/svnspam-0.1.tar.gz
+ -or-
+ svn checkout http://svnspam.googlecode.com/svn/trunk/ svnspam
 }}}
 
 Review the configuration file, making any obvious customizations
