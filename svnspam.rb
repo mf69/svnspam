@@ -1337,7 +1337,7 @@ File.open("#{$logfile}.emailtmp", File::RDWR|File::CREAT|File::TRUNC) do |mail|
 
   $diff_output_limiter = OutputSizeLimiter.new(mail, $mail_size_limit)
 
-    reader = LogReader.new($stdin)
+    reader = LogReader.new(File.open($logfile, "r"))
 
     until reader.eof
       handler = $handlers[reader.currentLineCode]
