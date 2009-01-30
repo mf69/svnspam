@@ -1,4 +1,6 @@
 #!/usr/bin/ruby -w
+#$Id$
+#$URL$
 
 # SVNspam
 #   http://www.bitpusher.com/projects/svnspam/
