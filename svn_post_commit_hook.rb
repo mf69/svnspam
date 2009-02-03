@@ -284,10 +284,13 @@ def process_svnlook_diff(file)
 	read_deleted_diff(file, lines, $1)
       elsif lines.current =~ /^Property changes on:\s+(.*)/
 	read_properties_changed(file, lines, $1)
-      elsif lines.current == "\n"
+      #elsif lines.current == "\n"
 	# ignore
-      else
-	raise "unable to parse line #{lines.current.inspect}"
+      #elsif lines.current =~ "=====.*\n"
+      #  # ignore
+      # else
+ 	##raise "unable to parse line #{lines.current.inspect}"
+	# just ignore
       end
     end
   end
