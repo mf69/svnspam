@@ -1,6 +1,11 @@
-Please go to http://code.google.com/p/svnspam/ for complete documentation
+Svnspam produces a nicely formatted HTML e-mail message containing the diff,
+ log message and versions of files involved in an svn commit. To do this it uses a post-commit hook configured by the Subversion repo admin.
 
-#Example line for post-commit
-/opt/svnspam/svn_post_commit_hook.rb --config /opt/svnspam/svnspam.conf $*  >> /tmp/svnspam.log 2>&1
-#
+More setup details can be found in the wiki.
+
+This project is a fork of cvsspam ... See the [http://www.badgers-in-foil.co.uk/projects/cvsspam/ CVSspam website] for more information about the origins of this program.
+
+On 2015-04-26 the project migrated from code.google.com to github.
+
+
 
